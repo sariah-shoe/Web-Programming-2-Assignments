@@ -1,0 +1,8 @@
+MongoDB Documentation
+https://www.mongodb.com/docs/
+
+How to Construct Regular Expressions
+https://www.mongodb.com/docs/manual/reference/operator/query/regex/
+
+Operations in mongoDB
+https://www.mongodb.com/docs/manual/core/queryable-encryption/reference/supported-operations/
