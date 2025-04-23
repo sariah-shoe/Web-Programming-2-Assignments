@@ -1,0 +1,1 @@
+db.cities.createIndex({"name" : 1});
