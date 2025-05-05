@@ -1,8 +1,17 @@
 import express from "express";
 import registerRoutes from "./routes.js";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
 
-export default (port) => {
+export default (port, dbUrl) => {
+    mongoose.connect(`mongodb://${dbUrl}`)
+    .then(() => {
+        console.log('MongoDB connection successful, MongoDB available ');
+    })
+    .catch(err => {
+        console.error(`MongoDB connection error: ${err}`);
+        process.exit(-1);
+    });
     const app = express();
     app.listen(port, () => console.log(`App started on port ${port}`))
     app.use(bodyParser.json());

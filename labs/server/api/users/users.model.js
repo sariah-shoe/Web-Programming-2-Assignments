@@ -1,80 +1,65 @@
-import { v4 as uuidv4 } from 'uuid';
+import mongoose from 'mongoose';
+let Schema = mongoose.Schema;
 
-class User {
-  users = [];
+/*
+  This section declares the schemas for the different documents
+  that will be used
+ */
 
-  find() {
-    // Returns a list of all users
-    return(this.users);
-  }
+// This schema represents the address of the user
+let addressSchema = Schema({
+  // addressLine1 is a simple String type that is required
+  addressLine1: {type: String, required: true},
+  // addressLine2 is a simple String type that is NOT required
+  addressLine2: {type: String, required: false},
+  // city is a simple String type that is required
+  city: {type: String, required: true},
+  // state is a simple String type that is required
+  state: {type: String, required: true},
+  // zip is a simple Number type that is required
+  zip: {type: Number, required: true}
+});
 
-  findById(userId) {
-    // Find user by Id
-    // Returns user, or null if not present
-    var currUser = this.users.find(user => user.id == userId);
-    if(currUser == undefined){
-      return(null);
-    } else {
-      return(currUser);
-    }
-  }
+// This schema represents the name of the user
+let nameSchema = Schema({
+  // firstName is a simple String type that is required
+  firstName: {type: String, required: true},
+  // middleName is a simple String type that is not required
+  middleName: {type: String, required: false},
+  // lastName is a simple String type that is required
+  lastName: {type: String, required: true}
+});
 
-  create(user) {
-    // Create a new user
-    // Return created user
-    // Generate the id and overwrite any id that may be present in user
-    let newId = uuidv4();
-    this.users.push({
-        id: newId,
-        name: user.body.name,
-        address: user.body.address,
-        age: user.body.age
-    });
-    return(this.users[this.users.length - 1]);
-  }
+// This is the main user schema
+let userSchema = Schema({
+  // Age is a simple number type that is required
+  age: {type: Number, required: true},
+  /*
+   Address is referenced as a 'foreign key' using the objectId
+   of an address stored in a separate collection.
+   The address will be populated by Mongoose using 'Population'
+   http://mongoosejs.com/docs/populate.html
+  */
+  address: {type: Schema.Types.ObjectId, ref: 'Address'},
+  /*
+   Name is a subdocument of User, and will be stored
+   in the same document as the User itself.
+   Unlike a populated document, this doesn't require an
+   ObjectId reference and the schema for name can be
+   referenced directly
+  */
+  name: nameSchema
+});
 
-  findOneAndUpdate(user) {
-    // Find user and update
-    // If user does not exist, create it using Id provided
-    // Return true if user was updated, false if user was created
-    var updateIndex = this.users.map(function(use){
-      return use.id;
-  }).indexOf(parseInt(user.params.id));
+/*
+  This section creates interactive models from the defined schemas
+  above so that you can perform Create Read Update and Delete (CRUD)
+  operations against the schemas.
+  NOTE since the nameSchema is embedded within userSchema, it does NOT have
+  to be created as a model!
+ */
+let Address = mongoose.model('Address', addressSchema);
+let User = mongoose.model('User', userSchema);
 
-  if(updateIndex === -1){
-    this.users.push({
-      id: user.params.id,
-      name: user.body.name,
-      address: user.body.address,
-      age: user.body.age
-  });
-    return(false);
-  } else {
-      this.users[updateIndex] = {
-          id: user.params.id,
-          name: user.body.name,
-          address: user.body.address,
-          age: user.body.age     
-      }
-      return(true)
-  }
-  }
-
-  remove(userId) {
-    // Remove user if exists with the Id provided
-    // Return true if removed
-    // Return false if did user not exist
-    var removeIndex = this.users.map(function(user){
-      return(user.id);
-  }).indexOf(userId);
-
-  if(removeIndex == -1){
-      return(false);
-  } else {
-      this.users.splice(removeIndex, 1);
-      return(true);
-  }
-  }
-}
-
-export default new User();
+// Export the two created models, Address and User
+export {Address, User};
