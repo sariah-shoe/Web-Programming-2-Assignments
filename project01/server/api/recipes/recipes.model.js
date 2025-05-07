@@ -9,21 +9,18 @@ let reviewSchema = Schema({
 });
 
 let ingredientSchema = Schema({
-    list: { 
-        name: {type: String},
-        unit: {type: String},
-        quantity: {type: Integer}
-    }
+    name: {type: String},
+    amount: {type: Integer}
 });
 
 let recipeSchema = Schema({
     name: {type: String},
     description: {type: String},
-    picture: {type: String},
+    image: {type: String},
     prepTime: {type: Integer},
     cookTime: {type: Integer},
     directions: {type: Array},
-    ingredients: ingredientSchema,
+    ingredients: {type: Array},
     reviews: {type: Array}
 });
 
