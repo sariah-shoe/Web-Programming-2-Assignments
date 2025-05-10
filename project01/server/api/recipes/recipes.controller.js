@@ -1,19 +1,18 @@
 'use strict';
 
-import {Review, Ingredient, Recipe} from './recipes.model.js';
+import { Review, Ingredient, Recipe } from './recipes.model.js';
+import { User } from '../users/users.model.js';
 
 // Find all Recipes
 export function index(req, res) {
   Recipe.find()
-    .populate('ingredient')
-    .populate('review')
     .exec()
-    .then(function(recipes) {
+    .then(function (recipes) {
       res.json({
         recipes
       });
     })
-    .catch(function(err) {
+    .catch(function (err) {
       res.status(500);
       res.send(err);
     });
@@ -21,21 +20,19 @@ export function index(req, res) {
 
 // Find details for one recipe
 export function show(req, res) {
-  recipe.findById(req.params.id)
-    .populate('ingredient')
-    .populate('review')
+  Recipe.findById(req.params.id)
     .exec()
-    .then(function(existingRecipe) {
-      if(existingRecipe) {
+    .then(function (existingRecipe) {
+      if (existingRecipe) {
         // recipe was found by Id
         res.status(200);
         res.json(existingRecipe);
       } else {
         res.status(404);
-        res.json({message: 'Not Found'});
+        res.json({ message: 'Not Found' });
       }
     })
-    .catch(function(err) {
+    .catch(function (err) {
       res.status(400);
       res.send(err);
     });
@@ -43,20 +40,14 @@ export function show(req, res) {
 
 // Create a new recipe
 export function create(req, res) {
-  let ingredients = req.body.ingredients;
   let recipe = req.body;
-  Ingredient.create(ingredients)
-    .then(function(createdIngredients) {
-      recipe.ingredients = createdIngredients;
-      return Recipe.create(recipe);
+
+  Recipe.create(recipe)
+    .then(function (createdRecipe) {
+      res.status(201).json(createdRecipe);
     })
-    .then(function(createdrecipe) {
-      res.status(201);
-      res.json(createdrecipe);
-    })
-    .catch(function(err) {
-      res.status(400);
-      res.send(err);
+    .catch(function (err) {
+      res.status(400).send(err);
     });
 }
 
@@ -64,18 +55,17 @@ export function create(req, res) {
 export function update(req, res) {
   // Start by trying to find the recipe by its id
   Recipe.findById(req.params.id)
-    .populate('ingredient')
-    .populate('review')
     .exec()
-    .then(function(existingRecipe) {
+    .then(function (existingRecipe) {
       // If recipe exists, update all fields of the object
-      if(existingRecipe) {
+      if (existingRecipe) {
         existingRecipe.name = req.body.name;
         existingRecipe.description = req.body.description;
         existingRecipe.image = req.body.image;
         existingRecipe.prepTime = req.body.prepTime;
         existingRecipe.cookTime = req.body.cookTime;
         existingRecipe.directions = req.body.directions;
+        existingRecipe.ingredients = req.body.ingredients;
 
         /*
          Promise.all takes an array of promises as an argument
@@ -84,18 +74,17 @@ export function update(req, res) {
          for each promise that was passed
         */
         return Promise.all([
-          existingrecipe.address.increment().save(),
-          existingrecipe.increment().save()
+          existingRecipe.increment().save()
         ]);
       } else {
         // recipe was not found
-        return existingrecipe;
+        return existingRecipe;
       }
     })
     // This .then will be called after the Promise.all resolves, or be called with null if the recipe was not found
-    .then(function(savedObjects) {
+    .then(function (savedObjects) {
       // savedObjects should be defined if Promise.all was invoked (recipe was found)
-      if(savedObjects) {
+      if (savedObjects) {
         res.status(200);
         // The order of responses are guaranteed to be the same as the order of the promises, so we can assume
         // the second element of the array is the result of the recipe update
@@ -103,11 +92,11 @@ export function update(req, res) {
       } else {
         // recipe was not found
         res.status(404);
-        res.json({message: 'Not Found'});
+        res.json({ message: 'Not Found' });
       }
     })
     // Error encountered during the save of the recipe or address
-    .catch(function(err) {
+    .catch(function (err) {
       res.status(400);
       res.send(err);
     });
@@ -115,39 +104,155 @@ export function update(req, res) {
 
 // Remove a recipe
 export function destroy(req, res) {
-  recipe.findById(req.params.id)
-    .populate('address')
+  Recipe.findById(req.params.id)
     .exec()
-    .then(function(existingrecipe) {
-      if(existingrecipe) {
-        /*
-          This is the equivalent of cascading delete in a relational database
-          If the recipe was found, remove both the recipe object and the address object from
-          their respective collections. Only record the delete as successful if both objects
-          are deleted
-         */
+    .then(function (existingRecipe) {
+      if (existingRecipe) {
         return Promise.all([
-          existingrecipe.address.deleteOne(),
-          existingrecipe.deleteOne()
+          existingRecipe.deleteOne()
         ]);
       } else {
-        return existingrecipe;
+        return existingRecipe;
       }
     })
     // Delete was successful
-    .then(function(deletedrecipe) {
-      if(deletedrecipe) {
+    .then(function (deletedRecipe) {
+      if (deletedRecipe) {
         res.status(204).send();
       } else {
-        // recipe was not found
+        // Recipe was not found
         res.status(404);
-        res.json({message: 'Not Found'});
+        res.json({ message: 'Not Found' });
       }
     })
-    // Address or recipe delete failed
-    .catch(function(err) {
+    // Recipe delete failed
+    .catch(function (err) {
       res.status(400);
       res.send(err);
     });
+}
+
+// Create a review
+export function createReview(req, res) {
+  User.findOne({ username: req.body.user })
+    .then(function (user) {
+      if (user) {
+        return Review.create({
+          description: req.body.description,
+          rating: req.body.rating,
+          user: user._id
+        });
+      } else {
+        throw { status: 404, message: "User Not Found" };
+      }
+    })
+    .then(function (newReview) {
+      return Recipe.findById(req.params.recipeId).exec()
+        .then(function (existingRecipe) {
+          if (existingRecipe) {
+            existingRecipe.reviews.push(newReview);
+            return existingRecipe.save();
+          } else {
+            throw { status: 404, message: "Recipe Not Found" };
+          }
+        });
+    })
+    .then(function (updatedRecipe) {
+      res.status(201).json(updatedRecipe);
+    })
+    .catch(function (err) {
+      if (err.status) {
+        res.status(err.status).json({ message: err.message });
+      } else {
+        res.status(400).send(err);
+      }
+    });
+}
+
+// Update a review
+export function updateReview(req, res) {
+  Review.findById(req.params.reviewId)
+    .exec()
+    .then(function (existingReview) {
+      if (existingReview) {
+        // Update the review
+        existingReview.description = req.body.description;
+        existingReview.rating = req.body.rating;
+        return existingReview.save();
+      } else {
+        throw { status: 404, message: "Review Not Found" };
+      }
+    })
+    .then(function (updatedReview) {
+      return Recipe.findById(req.params.recipeId).exec()
+        .then(function (existingRecipe) {
+          if (existingRecipe) {
+            const reviewIndex = existingRecipe.reviews.findIndex(review => review._id.toString() === updatedReview._id.toString());
+            if (reviewIndex !== -1) {
+              existingRecipe.reviews[reviewIndex] = updatedReview;
+              return existingRecipe.save();
+            } else {
+              throw { status: 404, message: "Review Not Found in Recipe" };
+            }
+          } else {
+            throw { status: 404, message: "Recipe Not Found" };
+          }
+        });
+    })
+    .then(function (existingRecipe) {
+      if (existingRecipe) {
+        res.status(200).json(existingRecipe);
+      } else {
+        throw { status: 404, message: "Recipe Not Found" };
+      }
+    })
+    .catch(function (err) {
+      if (err.status) {
+        res.status(err.status).json({ message: err.message });
+      } else {
+        res.status(400).send(err);
+      }
+    });
+}
+
+
+// Remove a review
+export function destroyReview(req, res) {
+  Review.findById(req.params.reviewId)
+  .exec()
+  .then(function(existingReview){
+    if (existingReview){
+      return existingReview.deleteOne();
+    } else {
+      throw {status: 404, message: "Review not found"};
+    }
+  })
+  .then(function (){
+    return Recipe.findById(req.params.recipeId).exec()
+    .then(function(existingRecipe){
+      if (existingRecipe){
+        const reviewIndex = existingRecipe.reviews.findIndex(review => review._id.toString() === req.params.reviewId.toString());
+        if (reviewIndex !== -1) {
+          existingRecipe.reviews.splice(reviewIndex, 1);
+          return existingRecipe.save();
+        } else {
+          throw { status: 404, message: "Review Not Found in Recipe" };
+        }
+      }
+      else {
+        throw { status: 404, message: "Recipe Not Found" };
+      }
+    });
+  })
+  .then(function () {
+    res.status(204).send();
+  })
+  .catch(function (err) {
+    if (err.status) {
+      res.status(err.status).json({ message: err.message });
+    } else {
+      res.status(400).send(err);
+    }
+  });
 }
 

@@ -3,25 +3,25 @@ let Schema = mongoose.Schema;
 
 let reviewSchema = Schema({
     description: {type: String},
-    rating: {type: Integer},
-    date: {type: Timestamp},
-    user : {type: ObjectId}
-});
+    rating: {type: Number},
+    user : {type: mongoose.ObjectId}
+},
+{timestamps: true});
 
 let ingredientSchema = Schema({
     name: {type: String},
-    amount: {type: Integer}
+    amount: {type: String}
 });
 
 let recipeSchema = Schema({
     name: {type: String},
     description: {type: String},
     image: {type: String},
-    prepTime: {type: Integer},
-    cookTime: {type: Integer},
+    prepTime: {type: Number},
+    cookTime: {type: Number},
     directions: {type: Array},
-    ingredients: {type: Array},
-    reviews: {type: Array}
+    ingredients: [ingredientSchema],
+    reviews: [reviewSchema]
 });
 
 let Review = mongoose.model('Review', reviewSchema);

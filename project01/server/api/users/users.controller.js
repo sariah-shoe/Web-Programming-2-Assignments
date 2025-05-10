@@ -1,6 +1,6 @@
 'use strict';
 
-import {Address, User} from './users.model.js';
+import {User} from './users.model.js';
 
 // Find all Users
 export function index(req, res) {
@@ -18,7 +18,6 @@ export function index(req, res) {
        the two tables for you
        http://mongoosejs.com/docs/populate.html
     */
-    .populate('address')
     /*
        exec() runs the query and returns a promise object.
        Promises are a cleaner way to chain asynchronous actions together than
@@ -49,7 +48,6 @@ export function index(req, res) {
 // Find details for one user
 export function show(req, res) {
   User.findById(req.params.id)
-    .populate('address')
     .exec()
     .then(function(existingUser) {
       /*
@@ -74,60 +72,28 @@ export function show(req, res) {
 
 // Create a new user
 export function create(req, res) {
-  /*
-    In this function we are taking the request body
-    As it was sent and using it as the JSON for the address
-    and user objects.
-    Since address is stored in a separate collection from user
-    we must create each document individually, and then associate
-    the address to the user after we know its id
-  */
-  let address = req.body.address;
   let user = req.body;
-  // Start off by saving the address
-  Address.create(address)
-    /*
-     Address was successfully saved, now associate saved address to the
-     user we are about to create and then save the user
-    */
-    .then(function(createdAddress) {
-      user.address = createdAddress;
-      /*
-       This return statement will return a promise object.
-       That means that the following .then in this chain
-       will not occur until after the user is saved, and will be given the result
-       of this promise resolving, which is the created user object
-      */
-      return User.create(user);
-    })
-    // User and Address saved successfully! return 201 with the created user object
-    .then(function(createdUser) {
-      res.status(201);
-      res.json(createdUser);
-    })
-    // An error was encountered during either the save of the address or the save of the user
-    .catch(function(err) {
-      res.status(400);
-      res.send(err);
-    });
+  User.create(user)
+  .then(function(createdUser){
+    res.status(201).json(createdUser);
+  })
+  .catch(function(err){
+    res.status(400);
+    res.send(err);
+  });
 }
 
 // Update a user
 export function update(req, res) {
   // Start by trying to find the user by its id
   User.findById(req.params.id)
-    .populate('address')
     .exec()
     // Update user and address
     .then(function(existingUser) {
       // If user exists, update all fields of the object
       if(existingUser) {
-        existingUser.address.addressLine1 = req.body.address.addressLine1;
-        existingUser.address.addressLine2 = req.body.address.addressLine2;
-        existingUser.address.city = req.body.address.city;
-        existingUser.address.state = req.body.address.state;
-        existingUser.address.zip = req.body.address.zip;
-        existingUser.age = req.body.age;
+        existingUser.username = req.body.username;
+        existingUser.email = req.body.email;
         existingUser.name.firstName = req.body.name.firstName;
         existingUser.name.middleName = req.body.name.middleName;
         existingUser.name.lastName = req.body.name.lastName;
@@ -138,7 +104,6 @@ export function update(req, res) {
          for each promise that was passed
         */
         return Promise.all([
-          existingUser.address.increment().save(),
           existingUser.increment().save()
         ]);
       } else {
@@ -170,18 +135,10 @@ export function update(req, res) {
 // Remove a user
 export function destroy(req, res) {
   User.findById(req.params.id)
-    .populate('address')
     .exec()
     .then(function(existingUser) {
       if(existingUser) {
-        /*
-          This is the equivalent of cascading delete in a relational database
-          If the user was found, remove both the user object and the address object from
-          their respective collections. Only record the delete as successful if both objects
-          are deleted
-         */
         return Promise.all([
-          existingUser.address.deleteOne(),
           existingUser.deleteOne()
         ]);
       } else {
