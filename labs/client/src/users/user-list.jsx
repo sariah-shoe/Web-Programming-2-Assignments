@@ -1,6 +1,19 @@
-import { Link } from 'react-router-dom';
+import { Link, useLoaderData } from 'react-router-dom';
 
 export default function UserList(){
+    const { users } = useLoaderData();
+    let rows = users.map(user => <tr key={user._id}>
+        <td>{user.name.lastName}</td>
+        <td>{user.name.firstName}</td>
+        <td>{user.name.middleName}</td>
+        <td>{user.address.addressLine1}</td>
+        <td>{user.address.addressLine2}</td>
+        <td>{user.address.city}</td>
+        <td>{user.address.state}</td>
+        <td>{user.address.zip}</td>
+        <td>{user.age}</td>
+        <td><Link to={`/users/${user._id}`}>View User</Link></td>
+    </tr>);
     return(<>
         <Link to={ '/' }>Return to Home</Link>
         <table>
@@ -19,18 +32,7 @@ export default function UserList(){
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>Smith</td>
-                <td>Bob</td>
-                <td>Quincy</td>
-                <td>1234 Elm Street</td>
-                <td></td>
-                <td>Denver</td>
-                <td>Colorado</td>
-                <td>80202</td>
-                <td>21</td>
-                <td><Link to={ '/users/1' }>View User</Link></td>
-            </tr>
+            { rows }
             </tbody>
         </table>
         </> )

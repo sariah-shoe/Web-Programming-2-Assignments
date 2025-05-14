@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Root from "./root/root";
 import UserList from "./users/user-list";
 import UserPage from "./users/user-page";
+import * as users from "./users/user-loaders.js"
 
 const router = createBrowserRouter([
     {
@@ -10,11 +11,13 @@ const router = createBrowserRouter([
     },
     {
         path: "/users",
-        element: <UserList />
+        element: <UserList />,
+        loader: users.load_all
     },
     {
         path: "/users/:id",
-        element: <UserPage />
+        element: <UserPage />,
+        loader: users.load_one
     }
 ]);
 
