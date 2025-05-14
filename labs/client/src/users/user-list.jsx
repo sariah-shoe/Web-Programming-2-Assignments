@@ -13,9 +13,11 @@ export default function UserList(){
         <td>{user.address.zip}</td>
         <td>{user.age}</td>
         <td><Link to={`/users/${user._id}`}>View User</Link></td>
+        <td><Link to={`/users/update/${user._id}`}>Update User</Link></td>
     </tr>);
     return(<>
         <Link to={ '/' }>Return to Home</Link>
+        <Link to={'/users/create'}>Create new user</Link>
         <table>
             <thead>
             <tr>
@@ -28,6 +30,7 @@ export default function UserList(){
                 <th>State</th>
                 <th>Zip</th>
                 <th>Age</th>
+                <th></th>
                 <th></th>
             </tr>
             </thead>
