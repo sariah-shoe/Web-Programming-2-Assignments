@@ -1,4 +1,5 @@
 import { Link, useLoaderData } from 'react-router-dom';
+import styles from './user-list.module.css';
 
 export default function UserList(){
     const { users } = useLoaderData();
@@ -18,20 +19,20 @@ export default function UserList(){
     return(<>
         <Link to={ '/' }>Return to Home</Link>
         <Link to={'/users/create'}>Create new user</Link>
-        <table>
+        <table className = {styles.userTable}>
             <thead>
             <tr>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Address Line 1</th>
-                <th>Address Line 2</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Zip</th>
-                <th>Age</th>
-                <th></th>
-                <th></th>
+                <th className = {styles.headerCell}>Last Name</th>
+                <th className = {styles.headerCell}>First Name</th>
+                <th className = {styles.headerCell}>Middle Name</th>
+                <th className = {styles.headerCell}>Address Line 1</th>
+                <th className = {styles.headerCell}>Address Line 2</th>
+                <th className = {styles.headerCell}>City</th>
+                <th className = {styles.headerCell}>State</th>
+                <th className = {styles.headerCell}>Zip</th>
+                <th className = {styles.headerCell}>Age</th>
+                <th className = {styles.headerCell}></th>
+                <th className = {styles.headerCell}></th>
             </tr>
             </thead>
             <tbody>
