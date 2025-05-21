@@ -1,20 +1,20 @@
 import { Link, useLoaderData } from 'react-router-dom';
-import styles from './user-list.module.css';
+import styles from './user-list.module.scss';
 
 export default function UserList(){
     const { users } = useLoaderData();
     let rows = users.map(user => <tr key={user._id}>
-        <td>{user.name.lastName}</td>
-        <td>{user.name.firstName}</td>
-        <td>{user.name.middleName}</td>
-        <td>{user.address.addressLine1}</td>
-        <td>{user.address.addressLine2}</td>
-        <td>{user.address.city}</td>
-        <td>{user.address.state}</td>
-        <td>{user.address.zip}</td>
-        <td>{user.age}</td>
-        <td><Link to={`/users/${user._id}`}>View User</Link></td>
-        <td><Link to={`/users/update/${user._id}`}>Update User</Link></td>
+        <td className = {styles.bodyCell}>{user.name.lastName}</td>
+        <td className = {styles.bodyCell}>{user.name.firstName}</td>
+        <td className = {styles.bodyCell}>{user.name.middleName}</td>
+        <td className = {styles.bodyCell}>{user.address.addressLine1}</td>
+        <td className = {styles.bodyCell}>{user.address.addressLine2}</td>
+        <td className = {styles.bodyCell}>{user.address.city}</td>
+        <td className = {styles.bodyCell}>{user.address.state}</td>
+        <td className = {styles.bodyCell}>{user.address.zip}</td>
+        <td className = {styles.bodyCell}>{user.age}</td>
+        <td className = {styles.bodyCell}><Link to={`/users/${user._id}`}>View User</Link></td>
+        <td className = {styles.bodyCell}><Link to={`/users/update/${user._id}`}>Update User</Link></td>
     </tr>);
     return(<>
         <Link to={ '/' }>Return to Home</Link>

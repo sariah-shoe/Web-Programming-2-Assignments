@@ -1,5 +1,11 @@
 .descriptor {
+    --main-color: brown;
     font-weight: bold;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;    
     text-decoration: underline;
+    color: var(--main-color);
+
+    & .info {
+        background-color: var(--main-color);
+    }
 }

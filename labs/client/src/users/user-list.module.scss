@@ -1,0 +1,19 @@
+$primary-color: darkgrey;
+
+@mixin cells($theme: black){
+    border: 2px solid $primary-color;
+    background-color: $theme;
+    color: white;
+}
+
+.userTable {
+    border: 2px solid $primary-color;
+}
+
+.headerCell {
+    @include cells($theme: darkRed);
+}
+
+.bodyCell {
+    @include cells()
+}
