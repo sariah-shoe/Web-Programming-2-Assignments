@@ -1,0 +1,13 @@
+.body {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.link {
+    padding: 10px;
+}
+
+.cell {
+    border: solid black 1px;
+}

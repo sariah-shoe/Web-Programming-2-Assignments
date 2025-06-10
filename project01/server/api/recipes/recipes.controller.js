@@ -6,6 +6,7 @@ import { User } from '../users/users.model.js';
 // Find all Recipes
 export function index(req, res) {
   Recipe.find()
+    .populate({ path: 'reviews.user', select: 'username' })
     .exec()
     .then(function (recipes) {
       res.json({
@@ -21,6 +22,7 @@ export function index(req, res) {
 // Find details for one recipe
 export function show(req, res) {
   Recipe.findById(req.params.id)
+    .populate({ path: 'reviews.user', select: 'username' })
     .exec()
     .then(function (existingRecipe) {
       if (existingRecipe) {
@@ -170,50 +172,47 @@ export function createReview(req, res) {
 }
 
 // Update a review
-export function updateReview(req, res) {
-  Review.findById(req.params.reviewId)
-    .exec()
-    .then(function (existingReview) {
-      if (existingReview) {
-        // Update the review
-        existingReview.description = req.body.description;
-        existingReview.rating = req.body.rating;
-        return existingReview.save();
-      } else {
-        throw { status: 404, message: "Review Not Found" };
-      }
-    })
-    .then(function (updatedReview) {
-      return Recipe.findById(req.params.recipeId).exec()
-        .then(function (existingRecipe) {
-          if (existingRecipe) {
-            const reviewIndex = existingRecipe.reviews.findIndex(review => review._id.toString() === updatedReview._id.toString());
-            if (reviewIndex !== -1) {
-              existingRecipe.reviews[reviewIndex] = updatedReview;
-              return existingRecipe.save();
-            } else {
-              throw { status: 404, message: "Review Not Found in Recipe" };
-            }
-          } else {
-            throw { status: 404, message: "Recipe Not Found" };
-          }
-        });
-    })
-    .then(function (existingRecipe) {
-      if (existingRecipe) {
-        res.status(200).json(existingRecipe);
-      } else {
-        throw { status: 404, message: "Recipe Not Found" };
-      }
-    })
-    .catch(function (err) {
-      if (err.status) {
-        res.status(err.status).json({ message: err.message });
-      } else {
-        res.status(400).send(err);
-      }
-    });
+// PUT /api/recipes/:recipeId/reviews/:reviewId
+export async function updateReview(req, res) {
+  try {
+    const user = await User.findOne({ username: req.body.user }).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'User Not Found' });
+    }
+    const review = await Review.findById(req.params.reviewId).exec();
+    if (!review) {
+      return res.status(404).json({ message: 'Review Not Found' });
+    }
+
+    review.description = req.body.description;
+    review.rating      = req.body.rating;
+    review.user        = user._id;
+
+    const updatedReview = await review.save();
+
+    const recipe = await Recipe.findById(req.params.recipeId).exec();
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe Not Found' });
+    }
+
+    const idx = recipe.reviews.findIndex(
+      r => r._id.toString() === updatedReview._id.toString()
+    );
+    if (idx === -1) {
+      return res
+        .status(404)
+        .json({ message: 'Review Not Found in Recipe' });
+    }
+
+    recipe.reviews[idx] = updatedReview;
+    await recipe.save();
+    res.status(200).json(recipe);
+  } catch (err) {
+    console.error(err);
+    res.status(400).send(err);
+  }
 }
+
 
 
 // Remove a review

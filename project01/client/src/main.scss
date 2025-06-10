@@ -1,0 +1,30 @@
+$background-color: #fefae0;
+$text-color: #283618;
+$link-color: #dda15e;
+$interacted-link-color: #bc6c25;
+$heading-color: #606c38;
+
+body {
+    background-color: $background-color;
+    color: $text-color;
+}
+
+a:link {
+    color: $link-color;
+}
+
+a:visited {
+    color: $interacted-link-color;
+}
+
+a:hover {
+    color: $interacted-link-color;
+}
+
+a:active {
+    color: $interacted-link-color;
+}
+
+h1, h2, h3, h4 {
+    color: $heading-color;
+}

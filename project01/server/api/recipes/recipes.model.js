@@ -4,7 +4,7 @@ let Schema = mongoose.Schema;
 let reviewSchema = Schema({
     description: {type: String},
     rating: {type: Number},
-    user : {type: mongoose.ObjectId}
+    user : {type: Schema.Types.ObjectId, ref: 'User'}
 },
 {timestamps: true});
 
