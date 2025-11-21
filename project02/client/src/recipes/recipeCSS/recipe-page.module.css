@@ -1,0 +1,21 @@
+.body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.list{
+    text-align: left;
+}
+
+.review{
+    border: solid black 1px;
+    padding: 10px;
+    margin: 10px;
+}
+
+.link{
+    margin: 10px;
+}
+
